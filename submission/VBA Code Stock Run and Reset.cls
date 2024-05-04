@@ -1,0 +1,167 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "Sheet1"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Sub stocks():
+    
+    
+    Dim i As LongLong ' row number
+    Dim cell_vol As LongLong ' contents of column C
+    Dim vtotal As LongLong ' what is going to go in column L
+    Dim ticker As String ' what is going to go in column I
+
+    Dim k As Long
+    
+    Dim close_price As Double 'closing price
+    Dim open_price As Double ' opening price
+    Dim price_change As Double ' price change
+    Dim average As Double 'average
+    Dim lastRow As Long
+    
+    ' worksheet loop
+    Dim ws As Worksheet
+    
+    Dim greatest_volume As LongLong
+    Dim greatest_percent As Double
+    Dim lowest_percent As Double
+    Dim greatest_volumeticker As String
+    Dim greatest_percentticker As String
+    Dim lowest_percentticker As String
+    
+    For Each ws In ThisWorkbook.Worksheets
+    
+        'asked the xpert
+        
+        lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        
+        ' write leaderboard/greatest #'s columns headers
+        
+        vtotal = 0
+        k = 2
+        
+        ' adding all appliciable headers
+        
+        ws.Range("I1").Value = "Ticker"
+        ws.Range("J1").Value = "Quarterly Change"
+        ws.Range("K1").Value = "Percent Change"
+        ws.Range("L1").Value = "Total Stock Volume"
+        ws.Range("P1").Value = "Ticker"
+        ws.Range("Q1").Value = "Value"
+        ws.Range("O2").Value = "Greatest % Increase"
+        ws.Range("O3").Value = "Greatest % Decrease"
+        ws.Range("O4").Value = "Greatest Total Volume"
+        ws.Columns("I:Q").AutoFit
+        
+        open_price = ws.Cells(2, 3).Value
+        
+        For i = 2 To lastRow:
+            cell_vol = ws.Cells(i, 7).Value
+            ticker = ws.Cells(i, 1).Value
+    
+            ' LOOP rows 2 to 254
+            ' check if next row credit card is DIFFERENT
+            ' if the same, then we only need to add to the vtotal
+            ' if DIFFERENT, then we need add last row, write out to the leaderboard
+            ' reset the vtotal to 0
+    
+            If (ws.Cells(i + 1, 1).Value <> ticker) Then
+                ' diff ticker = error
+                vtotal = vtotal + cell_vol
+                
+                ' get closing price of the ticker
+                close_price = ws.Cells(i, 6).Value
+                price_change = close_price - open_price
+                
+            
+                
+                ' checking if denominator is zero
+                If open_price > 0 Then
+                    average = price_change / open_price
+                    Else
+                        average = 0
+                End If
+                    
+                ws.Cells(k, 9).Value = ticker
+                ws.Cells(k, 10).Value = price_change
+                ws.Cells(k, 11).Value = average
+                ws.Cells(k, 12).Value = vtotal
+                
+                'formatting
+                If (price_change > 0) Then
+                    ws.Cells(k, 10).Interior.ColorIndex = 4 'green
+                    ws.Cells(k, 11).Interior.ColorIndex = 4 'green
+                    
+                ElseIf (price_change < 0) Then
+                    ws.Cells(k, 10).Interior.ColorIndex = 3 ' red
+                    ws.Cells(k, 11).Interior.ColorIndex = 3 ' red
+                Else
+                    ws.Cells(k, 10).Interior.ColorIndex = 2 ' white
+                    ws.Cells(k, 11).Interior.ColorIndex = 2 ' white
+                    
+                End If
+                
+                ' greatest leaderboard
+                If ticker = ws.Cells(2, 1).Value Then
+                    greatest_volume = vtotal
+                    greatest_percent = percent_change
+                    lowest_percent = percent_change
+                    greatest_volumeticker = ticker
+                    greatest_percentticker = ticker
+                    lowest_percentticker = ticker
+                Else
+                
+                    If vtotal > greatest_volume Then
+                        greatest_volume = vtotal
+                        greatest_volumeticker = ticker
+                    End If
+                    
+                     If percent_change > greatest_percent Then
+                        greatest_percent = percent_change
+                        greatest_percentticker = ticker
+                    End If
+                    
+                    If percent_change < lowest_percent Then
+                        lowest_percent = percent_change
+                        lowest_percentticker = ticker
+                    End If
+                    
+                    
+                  
+                End If
+                
+                ' reset
+                vtotal = 0
+                k = k + 1
+                open_price = ws.Cells(i + 1, 3).Value ' look ahead to get next ticker open
+            Else
+                ' we just add to the total
+                vtotal = vtotal + cell_vol
+            End If
+        Next i
+        
+          ' writing to ws
+        ws.Range("Q2").Value = greatest_percent
+        ws.Range("Q3").Value = lowest_percent
+        ws.Range("Q4").Value = greatest_volume
+        ws.Range("P2").Value = greatest_percentticker
+        ws.Range("P3").Value = lowest_percentticker
+        ws.Range("P4").Value = greatest_volumeticker
+        
+        
+    Next ws
+End Sub
+
+
+Sub reset()
+    Dim ws As Worksheet
+    
+    For Each ws In ThisWorkbook.Worksheets
+        ws.Range("I:L").Value = ""
+        ws.Range("I:L").Interior.ColorIndex = 2
+    Next ws
+End Sub
