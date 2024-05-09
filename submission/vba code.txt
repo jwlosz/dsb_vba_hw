@@ -1,13 +1,4 @@
 Sub stocks():
-
-    Dim i As Long ' row number
-    Dim cell_vol As LongLong 
-    Dim vol_total As LongLong 
-    Dim ticker As String 
-    Dim k As Long ' leaderboard row
-    
-    Dim ticker_close As Double
-Sub stocks():
     
     
     Dim i As LongLong ' row number
